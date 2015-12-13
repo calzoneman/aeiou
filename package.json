@@ -1,0 +1,16 @@
+{
+  "name": "aeiou-node",
+  "version": "1.0.0",
+  "description": "AEIOU!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Calvin Montgomery",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^4.13.3",
+    "serve-static": "^1.10.0",
+    "winston": "^2.1.1"
+  }
+}
