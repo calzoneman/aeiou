@@ -1,0 +1,40 @@
+exports.web = {
+    // Bind host (default localhost only), set to 0.0.0.0 to bind all interfaces
+    host: '127.0.0.1',
+    port: 8080,
+    // Path where rendered WAVs will be written/served from
+    filesPath: require('path').resolve(__dirname, 'files'),
+    // See https://www.npmjs.com/package/proxy-addr
+    // You only need to adjust this if you are running behind a reverse proxy
+    trustedProxies: 'loopback'
+};
+
+// Use the below config if running under wine
+exports.decwavPool = {
+    // Number of decwav workers to spawn.  Limited by DECTalk DRM (default 7)
+    maxProcs: 7,
+    // Maximum size of request queue if all workers are busy
+    maxQueueDepth: 50,
+    exec: 'wine',
+    args: ['decwav.exe'],
+    env: {
+        // The default wineprefix is usually stored at /home/yourusername/.wine
+        WINEPREFIX: '/path/to/your/wineprefix',
+        WINEARCH: 'win32'
+    }
+};
+
+// If running on native windows, remove the above config and uncomment this one
+/*
+exports.decwavPool = {
+    maxProcs: 7,
+    maxQueueDepth: 50,
+    exec: 'decwav.exe',
+    args: [],
+    env: {}
+};
+*/
+
+// Maximum length of TTS requests to accept (including any phoneme commands
+// in the input)
+exports.maxTextLength = 1024;

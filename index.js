@@ -1,22 +1,33 @@
-var Webserver = require('./lib/webserver');
-var config = require('./config.json');
-var winston = require('winston');
+const fs = require('fs');
+const { setLogBackend, Logger, LogLevel } = require('@calzoneman/jsli');
+const { version } = require('./package.json');
 
-let logger = new winston.Logger({
-    level: !!process.env.DEBUG ? 'debug' : 'info',
-    transports: [
-        new (winston.transports.Console)({
-            colorize: true
-        }),
-        new (winston.transports.File)({
-            filename: 'aeiou.log',
-            json: false
-        })
-    ]
+let level = process.env.DEBUG ? LogLevel.DEBUG : LogLevel.INFO;
+let logfile = fs.createWriteStream('aeiou.log', { flags: 'a' });
+
+class FileLogger extends Logger {
+    constructor(name, level) {
+        super(name, level);
+    }
+
+    emitMessage(level, message) {
+        let formatted = `[${level.name}] ${this.loggerName}: ${message}`;
+        logfile.write(formatted + '\n');
+        console.log(formatted);
+    }
+}
+
+setLogBackend((loggerName, level) => {
+    return new FileLogger(loggerName, level);
 });
+
+const LOGGER = require('@calzoneman/jsli')('main');
+LOGGER.info('Starting aeiou version %s', version);
 
 process.on('uncaughtException', error => {
-    logger.error(`Uncaught exception: ${error.stack}`);
+    LOGGER.fatal(`Uncaught exception: ${error.stack}`);
+    process.exit(1);
 });
 
-new Webserver(config, logger);
+const config = require('./config');
+require('./lib/webserver').start(config);

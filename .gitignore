@@ -1,4 +1,6 @@
-dectalk
+decwav.exe
 files/*.wav
 *.log
-node_module
+node_modules
+*.swp
+config.js
