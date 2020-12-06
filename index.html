@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>aeiou</title>
+  </head>
+  <body>
+    <h2>Check out the project <a href="https://github.com/calzoneman/aeiou" target="_blank" rel="noopener noreferer">on GitHub</a>.</h2>
+    <h2>Try it:</h2>
+    <noscript>
+      This interactive demo requires JavaScript (but only the inline script on this page).
+    </noscript>
+    <form action="javascript:tts()">
+      <label for="input-text">Enter text:</label>
+      <br>
+      <textarea maxlength="1024" id="input-text" cols="60" rows="10">aeiou</textarea>
+      <br>
+      <button type="submit">Play</button>
+    </form>
+    <audio id="result-audio">
+      Your browser does not support the HTML5 audio element.
+    </audio>
+    <script type="text/javascript">
+      let lastText = null;
+      let audio = null;
+      function tts() {
+        let text = document.getElementById('input-text').value;
+
+        if (text !== lastText) {
+          audio = new Audio(`/tts?text=${encodeURIComponent(text)}`);
+          audio.addEventListener('error', () => {
+            lastText = null;
+          });
+          audio.addEventListener('playing', () => {
+            lastText = text;
+          });
+        }
+
+        if (audio) audio.play();
+      }
+    </script>
+  </body>
+</html>
