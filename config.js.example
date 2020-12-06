@@ -11,7 +11,7 @@ exports.web = {
 
 // Use the below config if running under wine
 exports.decwavPool = {
-    // Number of decwav workers to spawn.  Limited by DECTalk DRM (default 7)
+    // Number of decwav workers to spawn.  Limited by Windows device concurrency
     maxProcs: 7,
     // Maximum size of request queue if all workers are busy
     maxQueueDepth: 50,
