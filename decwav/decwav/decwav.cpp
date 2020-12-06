@@ -7,10 +7,45 @@
 #define MMSUCCEEDED(x) ((x) == MMSYSERR_NOERROR)
 #define MMFAILED(x) (!MMSUCCEEDED(x))
 
+/*
+	If decwav crashes without successfully calling TextToSpeechShutdown(), then the
+	license file will be stuck with an inaccurate count of running processes.
+	Just reset it to 0 here, we already enforce process count limits in aeiou
+*/
+BOOL ResetLicenseCounter() {
+	HANDLE h = CreateFileMappingA(
+		INVALID_HANDLE_VALUE,
+		0,
+		PAGE_READWRITE,
+		0,
+		10,
+		"DECtalkDllLicensememfilemap"
+	);
+	if (h == NULL) {
+		std::cout << "ERROR: CreateFileMappingA returned code " << GetLastError() << std::endl;
+		return FALSE;
+	}
+
+	LPVOID mem = MapViewOfFile(h, FILE_MAP_WRITE, 0, 0, 0);
+	if (mem == NULL) {
+		std::cout << "ERROR: MapViewOfFile returned code " << GetLastError() << std::endl;
+		return FALSE;
+	}
+
+	*((unsigned char *)mem) = 0;
+	UnmapViewOfFile(mem);
+
+	return TRUE;
+}
+
 int main(void) {
 	LPTTS_HANDLE_T handle = NULL;
 	MMRESULT res;
 	int ret = 0;
+
+	if (!ResetLicenseCounter()) {
+		return 1;
+	}
 
 	res = TextToSpeechStartup(
 		/* HWND */ NULL,
@@ -46,7 +81,7 @@ int main(void) {
 		if (MMSUCCEEDED(res) && MMFAILED(res = TextToSpeechSync(handle))) {
 			std::cout << "ERROR: TextToSpeechSync returned code " << res << std::endl;
 		}
-		
+
 		int succeeded = MMSUCCEEDED(res);
 		if (MMFAILED(res = TextToSpeechCloseWaveOutFile(handle))) {
 			std::cout << "ERROR: TextToSpeechCloseWaveOutFile returned code " << res << std::endl;

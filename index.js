@@ -2,7 +2,7 @@ const fs = require('fs');
 const { setLogBackend, Logger, LogLevel } = require('@calzoneman/jsli');
 const { version } = require('./package.json');
 
-let level = process.env.DEBUG ? LogLevel.DEBUG : LogLevel.INFO;
+let defaultLevel = process.env.DEBUG ? LogLevel.DEBUG : LogLevel.INFO;
 let logfile = fs.createWriteStream('aeiou.log', { flags: 'a' });
 
 class FileLogger extends Logger {
@@ -11,14 +11,14 @@ class FileLogger extends Logger {
     }
 
     emitMessage(level, message) {
-        let formatted = `[${level.name}] ${this.loggerName}: ${message}`;
+        let formatted = `${new Date().toISOString()} [${level.name}] ${this.loggerName}: ${message}`;
         logfile.write(formatted + '\n');
         console.log(formatted);
     }
 }
 
 setLogBackend((loggerName, level) => {
-    return new FileLogger(loggerName, level);
+    return new FileLogger(loggerName, level || defaultLevel);
 });
 
 const LOGGER = require('@calzoneman/jsli')('main');
