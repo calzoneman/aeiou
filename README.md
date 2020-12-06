@@ -1,44 +1,25 @@
 aeiou
 =====
 
-This is a node.js webserver that wraps a C# application that wraps an ancient
-DLL from a text-to-speech application designed for Windows 95 that
-coincidentally is also the engine used by Moonbase Alpha.  Somehow, it works.
+`aeiou` is a web-based API for text-to-speech using the DECTalk engine.  You may
+recognize this particular speech-synthesis engine from various videogames and
+YouTube videos.
 
-I'm not distributing my TTS.exe (and the associated DLLs) due to licensing
-concerns, but you can try it out at http://tts.cyzon.us/files/playground.html.
-You can also make requests to `http://tts.cyzon.us/tts?text=<URL encoded text>`
-(the server will respond with a redirect to a rendered WAV file).  Currently
-I've configured the input size limit to be 1024 characters.
+In order to install it, you need Windows (or Wine on Linux) and a copy of
+DECTalk (I'm using version 4.61).
 
-## How it Works
+See [`decwav/README.md`](decwav/README.md) for instructions on how to build
+`decwav.exe`, which the webserver uses to process text-to-speech requests.
 
-The text to speech engine is based on
-[SharpTalk](https://github.com/whatsecretproject/SharpTalk/), a .NET wrapper for
-the FonixTalk text to speech software.  I modified it to support the original
-dectalk.dll again (somewhere in the repo history they switched from DECTalk to
-its successor FonixTalk, but did not explain exactly why this decision was made)
-and also added a binding to the native WAV output function in the DLL (rather
-than the render to memory buffer and then write to file approach that SharpTalk
-uses which caused problems for me).
-
-This node.js wrapper provides a web interface and calls the text to speech
-program to render out text to WAV files.  The filename is based on a hash of the
-input string, so it can be cached and served cheaply rather than regenerating it
-every time.  There is also a built in concurrency limit due to the fact that
-DECTalk's DRM prevents running more than 7 copies at once.
-
-I'm running this on a cheap Windows VM from [VirMach](http://virmach.com/) since
-I was unable to get it running correctly under Wine.  If you like it, feel free
-to toss a few mBTC to `1LPg2gJxGYZEjBizg9iGhu5sLSe2i2hjA7`.
+Please contact me if you would like to try out the copy I am hosting.
 
 ## License
 
-The node.js code in this repository is presented under the BSD 2-Clause
+The code in this repository is presented under the BSD 2-Clause
 simplified license:
 
 ```
-Copyright (c) 2015 Calvin Montgomery, All rights reserved.
+Copyright (c) 2015-2020 Calvin Montgomery, All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
