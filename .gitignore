@@ -1,6 +1,7 @@
-decwav.exe
-files/*.wav
 *.log
-node_modules
 *.swp
 config.js
+decwav.exe
+files/*.wav
+node_modules
+ttsrequests.ndjson

@@ -7,8 +7,6 @@
 
 #define MMSUCCEEDED(x) ((x) == MMSYSERR_NOERROR)
 #define MMFAILED(x) (!MMSUCCEEDED(x))
-#define CONTINUE TRUE
-#define ABORT FALSE
 
 /*
 	If decwav crashes without successfully calling TextToSpeechShutdown(), then the
@@ -42,12 +40,12 @@ BOOL ResetLicenseCounter() {
 }
 
 /*
-  TextToSpeechShutdown() attempts to send an exit message, however, one of DT's background
-  threads is buggy (and who can blame them?  Having GetMessageA() return a three-state BOOL
-  is a fascinating design decision) and ends up busy-looping under Wine.
+	TextToSpeechShutdown() attempts to send an exit message, however, one of DT's background
+	threads is buggy (and who can blame them?  Having GetMessageA() return a three-state BOOL
+	is a fascinating design decision) and ends up busy-looping under Wine.
 
-  Avoid this by stealing the handle to the background thread, replacing it with a dummy
-  (so that DECTalk still has something to close), and terminating the runaway thread ourselves.
+	Avoid this by stealing the handle to the background thread, replacing it with a dummy
+	(so that DECTalk still has something to close), and terminating the runaway thread ourselves.
 */
 
 unsigned int __stdcall fakethread(void *) { return 0; }
@@ -71,22 +69,14 @@ MMRESULT KillTTS(LPTTS_HANDLE_T handle) {
 	return MMSYSERR_NOERROR;
 }
 
-BOOL DoTTS(std::string& filename, std::string& text) {
-	LPTTS_HANDLE_T handle = NULL;
+BOOL DoTTS(LPTTS_HANDLE_T handle, std::string& filename, std::string& text) {
 	MMRESULT res;
 
-	res = TextToSpeechStartup(
-		/* HWND */ NULL,
-		&handle,
-		WAVE_MAPPER,
-		DO_NOT_USE_AUDIO_DEVICE
-	);
-	if (MMFAILED(res)) {
-		std::cout << "ERROR: TextToSpeechStartup returned code " << res << std::endl;
-		return ABORT;
-	}
 	if (MMFAILED(res = TextToSpeechOpenWaveOutFile(handle, (char *) filename.c_str(), WAVE_FORMAT_1M16)))
 		std::cout << "ERROR: TextToSpeechOpenWaveOutFile returned code " << res << std::endl;
+	/* Turn phoneme modifiers on by default for compatibility */
+	if (MMSUCCEEDED(res) && MMFAILED(res = TextToSpeechSpeak(handle, "[:phone on]", TTS_FORCE)))
+		std::cout << "ERROR: TextToSpeechSpeak returned code " << res << std::endl;
 	if (MMSUCCEEDED(res) && MMFAILED(res = TextToSpeechSpeak(handle, (char *) text.c_str(), TTS_FORCE)))
 		std::cout << "ERROR: TextToSpeechSpeak returned code " << res << std::endl;
 	if (MMSUCCEEDED(res) && MMFAILED(res = TextToSpeechSync(handle)))
@@ -94,16 +84,10 @@ BOOL DoTTS(std::string& filename, std::string& text) {
 	if (MMSUCCEEDED(res) && MMFAILED(res = TextToSpeechCloseWaveOutFile(handle)))
 		std::cout << "ERROR: TextToSpeechCloseWaveOutFile returned code " << res << std::endl;
 
-	int succeeded = MMSUCCEEDED(res);
+	if (MMSUCCEEDED(res))
+		std::cout << "Success" << std::endl;
 
-	if (MMFAILED(res = KillTTS(handle))) {
-		std::cout << "ERROR: TextToSpeechShutdown returned code " << res << std::endl;
-		return ABORT;
-	} else {
-		if (succeeded)
-			std::cout << "Success" << std::endl;
-		return CONTINUE;
-	}
+	return MMSUCCEEDED(res);
 }
 
 int main(void) {
@@ -111,11 +95,25 @@ int main(void) {
 		return 1;
 	}
 
+	LPTTS_HANDLE_T handle = NULL;
+	MMRESULT res;
+
 	std::cout << "Ready" << std::endl;
 
 	while (1) {
 		std::string filename;
 		std::string text;
+
+		res = TextToSpeechStartup(
+			/* HWND */ NULL,
+			&handle,
+			WAVE_MAPPER,
+			DO_NOT_USE_AUDIO_DEVICE
+		);
+		if (MMFAILED(res)) {
+			std::cout << "ERROR: TextToSpeechStartup returned code " << res << std::endl;
+			return 1;
+		}
 
 		std::getline(std::cin, filename);
 		std::getline(std::cin, text);
@@ -123,7 +121,12 @@ int main(void) {
 		if (std::cin.fail() || std::cin.eof())
 			break;
 
-		if (!DoTTS(filename, text))
+		BOOL shouldContinue = DoTTS(handle, filename, text);
+		if (MMFAILED(res = KillTTS(handle))) {
+			std::cout << "ERROR: TextToSpeechShutdown returned code " << res << std::endl;
+			return 1;
+		}
+		if (!shouldContinue)
 			return 1;
 	}
 
