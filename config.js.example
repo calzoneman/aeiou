@@ -16,12 +16,7 @@ exports.decwavPool = {
     // Maximum size of request queue if all workers are busy
     maxQueueDepth: 50,
     exec: 'wine',
-    args: ['decwav.exe'],
-    env: {
-        // The default wineprefix is usually stored at /home/yourusername/.wine
-        WINEPREFIX: '/path/to/your/wineprefix',
-        WINEARCH: 'win32'
-    }
+    args: ['decwav.exe']
 };
 
 // If running on native windows, remove the above config and uncomment this one
@@ -30,8 +25,7 @@ exports.decwavPool = {
     maxProcs: 7,
     maxQueueDepth: 50,
     exec: 'decwav.exe',
-    args: [],
-    env: {}
+    args: []
 };
 */
 
