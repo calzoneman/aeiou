@@ -29,5 +29,10 @@ process.on('uncaughtException', error => {
     process.exit(1);
 });
 
+process.on('SIGINT', () => {
+    LOGGER.fatal('Exiting on SIGINT');
+    process.exit(1);
+});
+
 const config = require('./config');
 require('./lib/webserver').start(config);
