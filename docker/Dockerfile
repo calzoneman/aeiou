@@ -9,7 +9,7 @@ RUN adduser --home /var/lib/aeiou --system --shell /bin/bash aeiou
 RUN mkdir /files /logs && chown aeiou:nogroup /files /logs
 USER aeiou
 
-RUN git clone -b 2.0 https://github.com/calzoneman/aeiou /var/lib/aeiou/aeiou
+RUN git clone https://github.com/calzoneman/aeiou /var/lib/aeiou/aeiou
 WORKDIR /var/lib/aeiou/aeiou
 RUN npm install
 
