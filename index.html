@@ -25,16 +25,22 @@
     <script type="text/javascript">
       let lastText = null;
       let audio = null;
+      let playing = false;
       function tts() {
         let text = document.getElementById('input-text').value;
 
-        if (text !== lastText) {
+        if (text !== lastText) {` +
           audio = new Audio(`/tts?text=${encodeURIComponent(text)}`);
           audio.addEventListener('error', () => {
+            playing = false;
             lastText = null;
           });
           audio.addEventListener('playing', () => {
+            playing = true;
             lastText = text;
+          });
+          audio.addEventListener('ended', () => {
+            playing = false;
           });
         }
 
@@ -44,12 +50,17 @@
       function stopPlayback() {
 	audio.pause();
 	audio.currentTime = 0;
+	playing = false;
       }
 
       function exportAudio() {
         let text = document.getElementById('input-text').value;
         window.location = `/tts?text=${encodeURIComponent(text)}`;
       }
+      
+      document.querySelector('#input-text').addEventListener("keypress", function (ev) {
+        if (ev.key === "Enter" && ev.ctrlKey && !playing) tts();
+      });
     </script>
   </body>
 </html>
