@@ -15,6 +15,7 @@
       <br>
       <textarea maxlength="1024" id="input-text" cols="60" rows="10">aeiou</textarea>
       <br>
+      <button type="submit">Play</button>
       <a href="javascript:stopPlayback()"><button type="button">Stop</button></a>
       <a href="javascript:exportAudio()"><button type="button">Export</button></a>
     </form>
@@ -41,8 +42,8 @@
       }
 
       function stopPlayback() {
-	      audio.pause();
-	      audio.currentTime = 0;
+	audio.pause();
+	audio.currentTime = 0;
       }
 
       function exportAudio() {
