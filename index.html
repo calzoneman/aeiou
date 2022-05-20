@@ -15,7 +15,8 @@
       <br>
       <textarea maxlength="1024" id="input-text" cols="60" rows="10">aeiou</textarea>
       <br>
-      <button type="submit">Play</button>
+      <a href="javascript:stopPlayback()"><button type="button">Stop</button></a>
+      <a href="javascript:exportAudio()"><button type="button">Export</button></a>
     </form>
     <audio id="result-audio">
       Your browser does not support the HTML5 audio element.
@@ -37,6 +38,16 @@
         }
 
         if (audio) audio.play();
+      }
+
+      function stopPlayback() {
+	      audio.pause();
+	      audio.currentTime = 0;
+      }
+
+      function exportAudio() {
+        let text = document.getElementById('input-text').value;
+        window.location = `/tts?text=${encodeURIComponent(text)}`;
       }
     </script>
   </body>
