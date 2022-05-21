@@ -29,7 +29,7 @@
       function tts() {
         let text = document.getElementById('input-text').value;
 
-        if (text !== lastText) {` +
+        if (text !== lastText) {
           audio = new Audio(`/tts?text=${encodeURIComponent(text)}`);
           audio.addEventListener('error', () => {
             playing = false;
