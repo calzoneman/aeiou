@@ -17,7 +17,7 @@
       <br>
       <button type="submit">Play</button>
       <button onclick="javascript:stopPlayback()" type="button">Stop</button>
-      <a id="tts-download" href="/tts?text=aeiou">Download</a>
+      <a id="tts-download" href="/tts?text=aeiou" target="_blank"><button type="button">Download</button></a>
     </form>
     <audio id="result-audio">
       Your browser does not support the HTML5 audio element.
@@ -58,6 +58,7 @@
         let downloadLink = document.getElementById('tts-download');
         downloadLink.href = `/tts?text=${encodeURIComponent(text)}`;
       };
+
       document.getElementById('input-text').onkeydown = ev => {
         if (ev.key === 'Enter' && ev.ctrlKey && !playing) tts();
       };
