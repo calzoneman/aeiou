@@ -1,4 +1,4 @@
-FROM i386/alpine:3.12
+FROM --platform=linux/386 i386/alpine:3.15
 
 RUN apk add --no-cache bash git nodejs npm pulseaudio wine xvfb
 

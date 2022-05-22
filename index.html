@@ -16,6 +16,8 @@
       <textarea maxlength="1024" id="input-text" cols="60" rows="10">aeiou</textarea>
       <br>
       <button type="submit">Play</button>
+      <button onclick="javascript:stopPlayback()" type="button">Stop</button>
+      <a id="tts-download" href="/tts?text=aeiou">Download</a>
     </form>
     <audio id="result-audio">
       Your browser does not support the HTML5 audio element.
@@ -23,21 +25,42 @@
     <script type="text/javascript">
       let lastText = null;
       let audio = null;
+      let playing = false;
       function tts() {
         let text = document.getElementById('input-text').value;
 
         if (text !== lastText) {
           audio = new Audio(`/tts?text=${encodeURIComponent(text)}`);
           audio.addEventListener('error', () => {
+            playing = false;
             lastText = null;
           });
           audio.addEventListener('playing', () => {
+            playing = true;
             lastText = text;
+          });
+          audio.addEventListener('ended', () => {
+            playing = false;
           });
         }
 
         if (audio) audio.play();
       }
+
+      function stopPlayback() {
+        audio.pause();
+        audio.currentTime = 0;
+        playing = false;
+      }
+
+      document.getElementById('input-text').oninput = ev => {
+        let text = document.getElementById('input-text').value;
+        let downloadLink = document.getElementById('tts-download');
+        downloadLink.href = `/tts?text=${encodeURIComponent(text)}`;
+      };
+      document.getElementById('input-text').onkeydown = ev => {
+        if (ev.key === 'Enter' && ev.ctrlKey && !playing) tts();
+      };
     </script>
   </body>
 </html>
