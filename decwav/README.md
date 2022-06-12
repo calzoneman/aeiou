@@ -12,9 +12,6 @@ under Wine in Linux.  However, I've only tried compiling it on Windows.
 You will need:
 
   * An installation of DECTalk (I'm using version 4.61)
-    - I added a workaround specifically for a bug in this version; if you are
-      trying to get the code working with a different version you may wish to
-      replace KillTTS().
   * Visual Studio/Visual C++ (I used 2012 since that's an old version I already
     had installed in my Windows VM)
 
@@ -26,3 +23,14 @@ To build:
   3. Copy `C:\Program Files (x86)\DECtalk\include\TTSAPI.H` to `dectalk/` (next
      to `decwav.cpp`)
   4. Open the project in Visual Studio and build
+
+I am not very familiar with Windows programming, so feel free to send a pull
+request if you know a better way to compile it.
+
+## Patching dectalk.dll
+
+As described in the [../README.md](aeiou README), if you are running decwav
+under wine (such as in the Docker installation instructions), then you will want
+to patch dectalk.dll.  Refer to Step 3 under the installation steps for
+instructions on how to patch the DLL, and then place it next to decwav.exe so
+that Windows will load the patched DLL before the installed one.
