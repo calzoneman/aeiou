@@ -15,6 +15,7 @@ RUN npm install
 
 COPY --chown=aeiou:nogroup wineprefix /var/lib/aeiou/wineprefix
 COPY --chown=aeiou:nogroup decwav.exe /var/lib/aeiou/aeiou/
+COPY --chown=aeiou:nogroup dectalk.dll /var/lib/aeiou/aeiou/
 COPY --chown=aeiou:nogroup config.js /var/lib/aeiou/aeiou/
 
 RUN touch /logs/aeiou.log /logs/ttsrequests.ndjson

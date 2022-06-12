@@ -1,0 +1,37 @@
+#!/bin/sh
+
+set -e
+
+# Assumes $XAUTHORITY and $DISPLAY have been set.
+if ! pgrep Xvfb >/dev/null; then
+    Xvfb :0 -screen 0 1024x768x24 -nolisten tcp >>/tmp/xvfb.log 2>&1 &
+fi
+
+function xvfbready {
+    mtime=$(stat -c %Y /tmp/.X11-unix/X0)
+    curtime=$(date +%s)
+    if [ $(( $curtime - $mtime )) -gt 3 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+if [ ! -f /tmp/.X11-unix/X0 ]; then
+    sleep 3
+fi
+
+mtime=$(stat -c %Y /tmp/.X11-unix/X0)
+curtime=$(date +%s)
+readytime=$(( $mtime + 3 ))
+sleeptime=$(( $readytime - $curtime ))
+if [ $sleeptime -gt 0 ]; then
+    sleep $sleeptime
+fi
+
+set +e
+"$@" 2>&1
+ecode=$?
+set -e
+
+exit $ecode
