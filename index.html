@@ -19,6 +19,7 @@
       <button onclick="javascript:stopPlayback()" type="button">Stop</button>
       <a id="tts-download" href="/tts?text=aeiou">Download</a>
     </form>
+    <p><strong id="error-output" style="color: red"></strong></p>
     <p><strong>Note:</strong> this TTS engine only supports US-ASCII; attempts to submit Unicode will probably result in very garbled output and may time out.</p>
     <audio id="result-audio">
       Your browser does not support the HTML5 audio element.
@@ -29,12 +30,17 @@
       let playing = false;
       function tts() {
         let text = document.getElementById('input-text').value;
+        document.getElementById('error-output').innerText = '';
 
         if (text !== lastText) {
           audio = new Audio(`/tts?text=${encodeURIComponent(text)}`);
-          audio.addEventListener('error', () => {
+          audio.addEventListener('error', error => {
             playing = false;
             lastText = null;
+            // TODO: the web endpoint does return an error message, the question is how to best
+            // preserve that when we passed the original URL to an audio constructor instead of
+            // fetching it ourselves.
+            document.getElementById('error-output').innerText = 'There was an error processing your request';
           });
           audio.addEventListener('playing', () => {
             playing = true;

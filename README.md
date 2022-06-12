@@ -89,6 +89,20 @@ patched dectalk.dll, as well as the wineprefix you created above:
 
     docker run --init --rm -it -p 8080:8080 -v $PWD/decwav.exe:/var/lib/aeiou/aeiou/decwav.exe -v $PWD/patched-dectalk.dll:/var/lib/aeiou/aeiou/dectalk.dll -v $PWD/wineprefix:/wineprefix --name aeiou aeiou:latest
 
+You may also choose to override certain environment variables if desired:
+
+
+  * `AEIOU_MAX_LENGTH=1024` maximum number of characters per request
+  * `AEIOU_MAX_PROCS=3` number of decwav processes in the rendering pool (each
+    process can handle one request at a time)
+  * `AEIOU_MAX_QUEUE_DEPTH=30` maximum number of pending requests waiting for a
+    decwav process to become available
+
+Additionally, you may want to bind-mount `/logs` and `/files` to have easy
+access to the log files and to be able to clean up the output files occasionally
+(aeiou does not automatically expire rendered files, but you may want to run a
+cron script to remove files older than a few days for disk savings).
+
 ### Troubleshooting
 
   * Error at decwav.cpp:25 after call to TextToSpeechStartup: 4
