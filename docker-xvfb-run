@@ -7,15 +7,9 @@ if ! pgrep Xvfb >/dev/null; then
     Xvfb :0 -screen 0 1024x768x24 -nolisten tcp >>/tmp/xvfb.log 2>&1 &
 fi
 
-function xvfbready {
-    mtime=$(stat -c %Y /tmp/.X11-unix/X0)
-    curtime=$(date +%s)
-    if [ $(( $curtime - $mtime )) -gt 3 ]; then
-        return 0
-    else
-        return 1
-    fi
-}
+# Hack: there's no particularly convenient way to tell when Xvfb is ready to
+# accept connections.  So if the listening socket either doesn't exist, or was
+# created very recently, wait a few seconds for it to start up.
 
 if [ ! -f /tmp/.X11-unix/X0 ]; then
     sleep 3

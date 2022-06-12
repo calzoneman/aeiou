@@ -8,10 +8,106 @@ YouTube videos.
 In order to install it, you need Windows (or Wine on Linux) and a copy of
 DECTalk (I'm using version 4.61).
 
-See [`decwav/README.md`](decwav/README.md) for instructions on how to build
-`decwav.exe`, which the webserver uses to process text-to-speech requests.
+Please [contact me](mailto:cyzon@cyzon.us) if you would like to try out the copy
+I am hosting.
 
-Please contact me if you would like to try out the copy I am hosting.
+## Installation under Docker
+
+You will need:
+
+  * Docker
+  * The DECtalk 4.61 release, which you can find
+    [here](http://theflameofhope.co/dectalkreader1/)
+  * Visual Studio, or some way of compiling Windows C++ projects
+
+For this guide, I assume your local user account has uid=1000, if it does not,
+you will need to adjust the uid in the Dockerfile to match.
+
+### Step 1: Build the docker image
+
+    docker build -t aeiou:latest .
+
+### Step 2: Install DECtalk into a new wineprefix
+
+The provided Docker image runs DECtalk in Wine, which requires DECtalk to be
+installed into a 32-bit wineprefix.  The easiest way to do this is to reuse the
+Docker image, overriding the startup command and bind-mounting the relevant
+files as well as your local X11 socket (for the GUI windows to appear).
+
+Assuming you want to create a new wineprefix under `./wineprefix`, and
+you have extracted DECtalkMain.zip to `/tmp/dectalk`:
+
+    mkdir $PWD/wineprefix
+    docker run --init --rm -it -v $PWD/wineprefix:/wineprefix -v /tmp/dectalk:/dectalk -v /tmp/.X11-unix:/tmp/.X11-unix --name aeiou aeiou:latest /bin/sh
+
+Once you are at the command prompt inside the Docker container, run:
+
+    cd /dectalk
+    wine Setup.exe
+
+...and then follow the installation wizard.
+
+  * You may get a prompt asking you to install Mono libraries.  You can cancel
+    this; aeiou doesn't need it.
+  * Make sure the `Windows SDK` box is ticked.  You can leave the Windows CE and
+    SAPI ones unticked.
+  * When prompted, set the language to English US.
+  * If you get an error message about an RPC call failing, try running the
+    installer again.  In my experience, it usually works the second time (I
+    don't know why).
+  * Once the installation completes, it will attempt to launch the demonstration
+    program which may show an error about a missing wave device.  You can ignore
+    this; aeiou writes output into wav files and doesn't require a local
+    playback device to be present.
+
+### Step 3: Build decwav, and patch dectalk.dll
+
+Decwav is a small Windows program that aeiou's frontend calls to process TTS
+requests and write out WAV files.  To build it, see <./decwav/README.md>.
+
+You will also need to patch dectalk.dll to work around a couple of issues with
+wine.  To do so:
+
+    cp ./wineprefix/drive_c/Program\ Files/DECtalk/Us/dectalk.dll ./patched-dectalk.dll
+    ./decwav/patchdll.js ./patched-dectalk.dll
+
+You should see this output:
+
+    Patching 0x30ac8
+    Patching 0x30ae8
+    Patching 0x2e0ee
+
+Note: if you don't have node.js installed on your local machine, you can do
+something similar to Step 2 and reuse the Docker image to run the patching
+commands.
+
+### Step 4: Run
+
+Now you can run the image.  Make sure you bind-mount both decwav.exe and your
+patched dectalk.dll, as well as the wineprefix you created above:
+
+    docker run --init --rm -it -p 8080:8080 -v $PWD/decwav.exe:/var/lib/aeiou/aeiou/decwav.exe -v $PWD/patched-dectalk.dll:/var/lib/aeiou/aeiou/dectalk.dll -v $PWD/wineprefix:/wineprefix --name aeiou aeiou:latest
+
+### Troubleshooting
+
+  * Error at decwav.cpp:25 after call to TextToSpeechStartup: 4
+    - The most likely cause is that you have not patched dectalk.dll (please
+      check Step 3 again), or you have not bind-mounted your dectalk.dll to the
+      correct location (please check Step 4 again).
+  * Error at decwav.cpp:25 after call to TextToSpeechStartup: 11
+    - The most likely cause is that your DECtalk installation is incomplete.
+      Try running the DECtalk installer again (see Step 2).
+  * pid X: timeout waiting for TTS
+    - aeiou waits at most 5 seconds for a single text to speech request to be
+      rendered.  This error occurs when a single request takes longer than 5
+      seconds, so aeiou is canceling the request by killing the process.  The
+      most common cause is excessively long output -- while aeiou does enforce a
+      character limit, certain characters can cause the TTS engine to speak very
+      long output.  For example, large blocks of Unicode characters can cause
+      the engine to read out garbage like "A circumflex A circumflex question
+      mark ...".
+    - Note that the 5 second timeout here refers to *how long it takes to create
+      the file*, not necessarily how long the output speech is.
 
 ## License
 
@@ -19,7 +115,7 @@ The code in this repository is presented under the BSD 2-Clause
 simplified license:
 
 ```
-Copyright (c) 2015-2020 Calvin Montgomery, All rights reserved.
+Copyright (c) 2015-2022 Calvin Montgomery, All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
