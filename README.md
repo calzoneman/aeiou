@@ -63,7 +63,8 @@ Once you are at the command prompt inside the Docker container, run:
 ### Step 3: Build decwav, and patch dectalk.dll
 
 Decwav is a small Windows program that aeiou's frontend calls to process TTS
-requests and write out WAV files.  To build it, see <./decwav/README.md>.
+requests and write out WAV files.  To build it, see
+[decwav/README.md](./decwav/README.md).
 
 You will also need to patch dectalk.dll to work around a couple of issues with
 wine.  To do so:

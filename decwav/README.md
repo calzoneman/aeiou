@@ -29,7 +29,7 @@ request if you know a better way to compile it.
 
 ## Patching dectalk.dll
 
-As described in the [../README.md](aeiou README), if you are running decwav
+As described in the [aeiou README](../README.md), if you are running decwav
 under wine (such as in the Docker installation instructions), then you will want
 to patch dectalk.dll.  Refer to Step 3 under the installation steps for
 instructions on how to patch the DLL, and then place it next to decwav.exe so
