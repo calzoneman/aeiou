@@ -2,6 +2,7 @@
 *.swp
 config.js
 decwav.exe
+dectalk.dll
 files/*.wav
 node_modules
 ttsrequests.ndjson
