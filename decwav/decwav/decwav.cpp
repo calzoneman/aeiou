@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <fstream>
 #include <windows.h>
 
 #include "TTSAPI.H"
@@ -63,13 +62,13 @@ int
 main(void)
 {
 	LPTTS_HANDLE_T handle = nullptr;
-	std::cout << "Ready" << std::endl;
 
 	while (true) {
 		std::string filename;
 		std::string text;
 
 		tts_init(&handle);
+		std::cout << "Ready" << std::endl;
 
 		std::getline(std::cin, filename);
 		std::getline(std::cin, text);
@@ -80,8 +79,6 @@ main(void)
 		tts_speak(handle, filename, text);
 		std::cout << "Success" << std::endl;
 
-		// TODO: investigate further whether it is possible to soft-reset
-		// (TextToSpeechReset doesn't reset everything)
 		tts_close(&handle);
 	}
 
