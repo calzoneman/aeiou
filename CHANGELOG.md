@@ -1,3 +1,8 @@
+2.2.1
+=====
+
+  * Fixed a bug in the handling of decwav output.
+
 2.2.0
 =====
 
