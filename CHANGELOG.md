@@ -1,3 +1,8 @@
+2.2.2
+=====
+
+  * Added a new dectalk.dll patch for handling overflows in phoneme duration.
+
 2.2.1
 =====
 

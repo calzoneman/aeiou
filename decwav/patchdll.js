@@ -7,6 +7,10 @@ function hexliteral(str) {
 }
 
 let patches = [
+    /* Patchset 1:
+     * Change != 0 comparisons to signed <= and > comparisons to handle
+     * GetMessageA returning 0xFFFFFFFF correctly in the window procedure.
+     */
     {
         // Change JZ to JLE
         offset: 0x30ac8,
@@ -19,11 +23,41 @@ let patches = [
         before: hexliteral('52 ff d7 85 c0 75 e3 5b'),
         after:  hexliteral('52 ff d7 85 c0 7f e3 5b'),
     },
+
+    /* Patchset 2:
+     * Change the conditional jump to an unconditional jump in the license
+     * counter check to bypass the maximum process count (prone to becoming
+     * corrupted if processes crash without decrementing it etc.).
+     */
     {
         // Change JNZ to JMP
         offset: 0x2e0ee,
         before: hexliteral('75 0d 5f 5e 5d b8 04 00'),
         after:  hexliteral('eb 0d 5f 5e 5d b8 04 00')
+    },
+
+    /* Patchset 3:
+     * Add an overflow check to phoneme duration (signed short) to an unused
+     * area of debug code.  Reroute the phoneme duration code to the overflow
+     * check before saving it.
+     */
+    {
+        offset: 0x25ed0,
+        before: hexliteral('83 c4 08 66 81 bf 40 06 00 00 ff 2f 8b e8 75 3d ' +
+                           '68 d8 f0 07 1c ff d3 68 f8 f0 07 1c ff d3 68 2c ' +
+                           'f1 07 1c ff d3 68 60 f1 07 1c ff d3 68 90 f1 07 ' +
+                           '1c ff d3 68 c0 f1 07 1c ff d3 68 f0 f1 07 1c ff ' +
+                           'd3 83 c4 1c 66 c7 87 40 06 00 00 00 00 8b 87 34'),
+        after:  hexliteral('83 c4 08 66 81 bf 40 06 00 00 ff 2f 8b e8 eb 3d ' +
+                           '66 8b 54 24 12 66 85 d2 7d 04 66 ba ff 7f e9 e9 ' +
+                           '05 00 00 90 90 90 90 90 90 90 90 90 90 90 90 90 ' +
+                           '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 ' +
+                           '90 90 90 90 90 90 90 90 90 90 90 90 90 8b 87 34')
+    },
+    {
+        offset: 0x264d0,
+        before: hexliteral('0f bf 86 82 17 00 00 66 8b 54 24 12 83 fd 01 66'),
+        after:  hexliteral('0f bf 86 82 17 00 00 e9 04 fa ff ff 83 fd 01 66')
     }
 ];
 

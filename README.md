@@ -77,6 +77,8 @@ You should see this output:
     Patching 0x30ac8
     Patching 0x30ae8
     Patching 0x2e0ee
+    Patching 0x25ed0
+    Patching 0x264d0
 
 Note: if you don't have node.js installed on your local machine, you can do
 something similar to Step 2 and reuse the Docker image to run the patching
