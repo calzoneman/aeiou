@@ -26,32 +26,41 @@
     </audio>
     <script type="text/javascript">
       let lastText = null;
-      let audio = null;
+      let audio = document.getElementById('result-audio');
       let playing = false;
+
+      audio.addEventListener('error', error => {
+        playing = false;
+        lastText = null;
+        // TODO: the web endpoint does return an error message, the question is how to best
+        // preserve that when we passed the original URL to an audio constructor instead of
+        // fetching it ourselves.
+        document.getElementById('error-output').innerText = 'There was an error processing your request';
+      });
+      audio.addEventListener('playing', () => {
+        playing = true;
+      });
+      audio.addEventListener('ended', () => {
+        playing = false;
+      });
+
       function tts() {
         let text = document.getElementById('input-text').value;
         document.getElementById('error-output').innerText = '';
 
         if (text !== lastText) {
-          audio = new Audio(`/tts?text=${encodeURIComponent(text)}`);
-          audio.addEventListener('error', error => {
-            playing = false;
-            lastText = null;
-            // TODO: the web endpoint does return an error message, the question is how to best
-            // preserve that when we passed the original URL to an audio constructor instead of
-            // fetching it ourselves.
-            document.getElementById('error-output').innerText = 'There was an error processing your request';
-          });
+          audio.src = `/tts?text=${encodeURIComponent(text)}`;
           audio.addEventListener('playing', () => {
-            playing = true;
             lastText = text;
-          });
-          audio.addEventListener('ended', () => {
-            playing = false;
-          });
+          }, { once: true });
         }
-
-        if (audio) audio.play();
+        if (audio.readyState >= 2) {
+          audio.play();
+        } else {
+          audio.addEventListener('canplay', () => {
+            audio.play();
+          }, { once: true });
+        }
       }
 
       function stopPlayback() {

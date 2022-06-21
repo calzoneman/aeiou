@@ -1,3 +1,10 @@
+2.2.3
+=====
+
+  * Refactored index.html.
+  * Added `aeiou_tts_request_latency` metric.
+  * Added error log statement indicating which input caused the error.
+
 2.2.2
 =====
 
