@@ -40,6 +40,9 @@ let patches = [
      * Add an overflow check to phoneme duration (signed short) to an unused
      * area of debug code.  Reroute the phoneme duration code to the overflow
      * check before saving it.
+     *
+     * Add a null-pointer check because there are other causes of null pointer
+     * issues here besides just the overflow
      */
     {
         offset: 0x25ed0,
@@ -50,15 +53,20 @@ let patches = [
                            'd3 83 c4 1c 66 c7 87 40 06 00 00 00 00 8b 87 34'),
         after:  hexliteral('83 c4 08 66 81 bf 40 06 00 00 ff 2f 8b e8 eb 3d ' +
                            '66 8b 54 24 12 66 85 d2 7d 04 66 ba ff 7f e9 e9 ' +
-                           '05 00 00 90 90 90 90 90 90 90 90 90 90 90 90 90 ' +
-                           '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 ' +
+                           '05 00 00 8b 48 1c 85 c9 0f 84 a3 08 ff ff 66 8b ' +
+                           '11 e9 75 08 ff ff 90 90 90 90 90 90 90 90 90 90 ' +
                            '90 90 90 90 90 90 90 90 90 90 90 90 90 8b 87 34')
     },
     {
         offset: 0x264d0,
         before: hexliteral('0f bf 86 82 17 00 00 66 8b 54 24 12 83 fd 01 66'),
         after:  hexliteral('0f bf 86 82 17 00 00 e9 04 fa ff ff 83 fd 01 66')
-    }
+    },
+    {
+        offset: 0x16770,
+        before: hexliteral('66 3b d5 7c 2c 8b 48 1c 66 8b 11 83 c1 02 66 89'),
+        after:  hexliteral('66 3b d5 7c 2c e9 79 f7 00 00 90 83 c1 02 66 89')
+    },
 ];
 
 let filename = process.argv[2];
