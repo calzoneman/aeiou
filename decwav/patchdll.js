@@ -54,19 +54,29 @@ let patches = [
         after:  hexliteral('83 c4 08 66 81 bf 40 06 00 00 ff 2f 8b e8 eb 3d ' +
                            '66 8b 54 24 12 66 85 d2 7d 04 66 ba ff 7f e9 e9 ' +
                            '05 00 00 8b 48 1c 85 c9 0f 84 a3 08 ff ff 66 8b ' +
-                           '11 e9 75 08 ff ff 90 90 90 90 90 90 90 90 90 90 ' +
-                           '90 90 90 90 90 90 90 90 90 90 90 90 90 8b 87 34')
+                           '11 e9 75 08 ff ff 8b 9b 80 02 00 00 85 db 0f 84 ' +
+                           '10 d5 fd ff e9 3f d3 fd ff 90 90 90 90 8b 87 34')
     },
     {
+        // Overflow on [bah<32768,25>]
         offset: 0x264d0,
         before: hexliteral('0f bf 86 82 17 00 00 66 8b 54 24 12 83 fd 01 66'),
         after:  hexliteral('0f bf 86 82 17 00 00 e9 04 fa ff ff 83 fd 01 66')
     },
     {
+        // Null pointer segfault on [s<1,20>][s<1,20>]
         offset: 0x16770,
         before: hexliteral('66 3b d5 7c 2c 8b 48 1c 66 8b 11 83 c1 02 66 89'),
         after:  hexliteral('66 3b d5 7c 2c e9 79 f7 00 00 90 83 c1 02 66 89')
     },
+    {
+        // Null pointer segfault on [:dial:1234]
+        offset: 0x3240,
+        before: hexliteral('5e 5d 5b 83 c4 10 c3 6a ff 57 e8 81 dc 02 00 8b ' +
+                           '9b 80 02 00 00 83 c4 08 89 5c 24 24 8a 0b 84 c9'),
+        after:  hexliteral('5e 5d 5b 83 c4 10 c3 6a ff 57 e8 81 dc 02 00 83 ' +
+                           'c4 08 e9 af 2c 02 00 90 89 5c 24 24 8a 0b 84 c9')
+    }
 ];
 
 let filename = process.argv[2];

@@ -1,6 +1,11 @@
 2.2.4
 =====
 
+  * Patched yet another crash condition in dectalk.dll.
+
+2.2.4
+=====
+
   * Patched another crash condition in dectalk.dll.
 
 2.2.3
