@@ -15,8 +15,8 @@
       <br>
       <textarea maxlength="1024" id="input-text" cols="60" rows="10">aeiou</textarea>
       <br>
-      <button type="submit">Play</button>
-      <button onclick="javascript:stopPlayback()" type="button">Stop</button>
+      <button id="play" type="submit">Play</button>
+      <button id="stop" type="button" hidden>Stop</button>
       <a id="tts-download" href="/tts?text=aeiou">Download</a>
     </form>
     <p><strong id="error-output" style="color: red"></strong></p>
@@ -39,10 +39,25 @@
       });
       audio.addEventListener('playing', () => {
         playing = true;
+        updateButtons();
       });
       audio.addEventListener('ended', () => {
         playing = false;
+        updateButtons();
       });
+
+      function updateButtons() {
+        let playBtn = document.getElementById('play');
+        let stopBtn = document.getElementById('stop');
+
+        if (playing) {
+          playBtn.hidden = true;
+          stopBtn.hidden = false;
+        } else {
+          playBtn.hidden = false;
+          stopBtn.hidden = true;
+        }
+      }
 
       function tts() {
         let text = document.getElementById('input-text').value;
@@ -77,6 +92,7 @@
       document.getElementById('input-text').onkeydown = ev => {
         if (ev.key === 'Enter' && ev.ctrlKey && !playing) tts();
       };
+      document.getElementById('stop').onclick = stopPlayback;
     </script>
   </body>
 </html>
