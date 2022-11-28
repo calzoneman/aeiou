@@ -1,6 +1,6 @@
 {
   "name": "aeiou-node",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "AEIOU!",
   "main": "index.js",
   "scripts": {
