@@ -5,8 +5,8 @@ RUN apk add --no-cache bash git nodejs npm pulseaudio wine xvfb
 COPY ./docker-xvfb-run /usr/local/bin/xvfb-run
 
 RUN adduser --home /var/lib/aeiou --system --uid=1000 --shell /bin/bash aeiou
-RUN mkdir -p /files/rendered /files/tmp /logs /var/lib/aeiou/aeiou /wineprefix && \
-  chown aeiou:nogroup /files/rendered /files/tmp /logs /var/lib/aeiou/aeiou /wineprefix
+RUN mkdir -p /files /logs /var/lib/aeiou/aeiou /wineprefix && \
+  chown aeiou:nogroup /files /logs /var/lib/aeiou/aeiou /wineprefix
 USER aeiou
 
 RUN touch /logs/aeiou.log /logs/ttsrequests.ndjson
