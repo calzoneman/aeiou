@@ -1,7 +1,8 @@
 exports.web = {
     host: '0.0.0.0',
     port: 8080,
-    filesPath: '/files',
+    filesPath: '/files/rendered',
+    tmpPath: '/files/tmp',
     trustedProxies: ['loopback', '192.168.0.0/16', '172.16.0.0/12']
 };
 

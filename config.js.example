@@ -4,6 +4,8 @@ exports.web = {
     port: 8080,
     // Path where rendered WAVs will be written/served from
     filesPath: require('path').resolve(__dirname, 'files'),
+    // Path where WAVs will be rendered before moving to the filesPath
+    tmpPath: require('path').resolve(__dirname, 'tmpfiles'),
     // See https://www.npmjs.com/package/proxy-addr
     // You only need to adjust this if you are running behind a reverse proxy
     trustedProxies: 'loopback'
