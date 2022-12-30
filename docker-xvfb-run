@@ -23,9 +23,4 @@ if [ $sleeptime -gt 0 ]; then
     sleep $sleeptime
 fi
 
-set +e
-"$@" 2>&1
-ecode=$?
-set -e
-
-exit $ecode
+exec "$@" 2>&1

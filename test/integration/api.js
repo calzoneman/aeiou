@@ -163,7 +163,7 @@ describe('aeiou API', () => {
         assert.strictEqual(res.statusCode, 400);
     });
 
-    // XXX: assumes default config
+    // XXX: assumes default config for length limit
     it('rejects a string too long as invalid', async () => {
         let longString = '';
         for (let i = 0; i < 1024+1; i++) {
@@ -172,5 +172,34 @@ describe('aeiou API', () => {
 
         const res = await callTTS(longString);
         assert.strictEqual(res.statusCode, 413);
+    });
+
+    it('caches and immediately rejects repeated requests for timeouts/crashes', async function() {
+        // Crashes dectalk, not sure quite why, but works as a crash test case
+        // for now.
+        let badString = 'EST CST MST PST EST CST MST PST EST CST MST PST EST ' +
+                        'CST MST PST EST CST MST PST EST CST MST PST EST CST ' +
+                        'MST PST EST CST MST PST EST CST MST PST EST CST MST ' +
+                        'PST EST CST MST PST EST CST MST PST EST CST MST PST ' +
+                        'EST CST MST PST EST CST MST PST EST CST' + randomID();
+
+        const before = await getMetrics();
+        const res1 = await callTTS(badString);
+        assert.strictEqual(res1.statusCode, 500);
+
+        const res2 = await callTTS(badString);
+        const after = await getMetrics();
+        assert.strictEqual(res2.statusCode, 500);
+
+        // Only one request is a QUEUE_NEW
+        assert.strictEqual(
+            diffMetrics(before, after, /aeiou_tts_requests_count\{decision="QUEUE_NEW"\}/),
+            1
+        );
+        // The other is a REJECT_CACHED_FAILURE
+        assert.strictEqual(
+            diffMetrics(before, after, /aeiou_tts_requests_count\{decision="REJECT_CACHED_FAILURE"\}/),
+            1
+        );
     });
 });
