@@ -17,7 +17,7 @@ You will need:
 
   * Docker
   * The DECtalk 4.61 release, which you can find
-    [here](https://dectalk.nu/#:~:text=SAPI5%20FP%20installer-,DECtalk%204.61,-Speak%20windows%20installer)
+    [here](https://dectalk.nu/#7)
   * Visual Studio, or some way of compiling Windows C++ projects
 
 For this guide, I assume your local user account has uid=1000, if it does not,
