@@ -29,6 +29,12 @@ you will need to adjust the uid in the Dockerfile to match.
 
 ### Step 2: Install DECtalk into a new wineprefix
 
+If you use the fixed `dectalk.dll` included in this repository (see Step 3), you
+can skip the installer: an empty 32-bit wineprefix is enough.  Just create the
+directory with `mkdir $PWD/wineprefix`; the container sets it up the first time
+it starts.  The steps below are only needed if you want to use the `dectalk.dll`
+from your own DECtalk installation.
+
 The provided Docker image runs DECtalk in Wine, which requires DECtalk to be
 installed into a 32-bit wineprefix.  The easiest way to do this is to reuse the
 Docker image, overriding the startup command and bind-mounting the relevant
@@ -60,14 +66,23 @@ Once you are at the command prompt inside the Docker container, run:
     this; aeiou writes output into wav files and doesn't require a local
     playback device to be present.
 
-### Step 3: Build decwav, and patch dectalk.dll
+### Step 3: Build decwav, and get dectalk.dll
 
 Decwav is a small Windows program that aeiou's frontend calls to process TTS
 requests and write out WAV files.  To build it, see
 [decwav/README.md](./decwav/README.md).
 
-You will also need to patch dectalk.dll to work around a couple of issues with
-wine.  To do so:
+This repository includes a fixed DECtalk 4.61 `dectalk.dll` and its dictionary
+`dtalk_us.dic` in the `dectalk/` directory.  It doesn't need patching: it works
+under wine as-is, has no per-process license counter, and the crashes that
+`patchdll.js` works around (`[bah<32768,25>]`, `[s<1,20>][s<1,20>]` and
+`[:dial:1234]`) are fixed in the engine itself.  It also sounds better (3.0-style
+intonation and timing, voice definitions from the DECtalk manual, fixed singing
+and an updated dictionary) while keeping 4.61's own phoneme tables, and it
+reports the same version ("v4.61 R002") with the same exported functions.
+
+If you would rather use the `dectalk.dll` from your own DECtalk installation, you
+will need to patch it to work around a couple of issues with wine.  To do so:
 
     cp ./wineprefix/drive_c/Program\ Files/DECtalk/Us/dectalk.dll ./patched-dectalk.dll
     ./decwav/patchdll.js ./patched-dectalk.dll
@@ -86,10 +101,14 @@ commands.
 
 ### Step 4: Run
 
-Now you can run the image.  Make sure you bind-mount both decwav.exe and your
-patched dectalk.dll, as well as the wineprefix you created above:
+Now you can run the image.  Make sure you bind-mount decwav.exe, dectalk.dll and
+its dictionary dtalk_us.dic, as well as the wineprefix you created above:
 
-    docker run --init --rm -it -p 8080:8080 -v $PWD/decwav.exe:/var/lib/aeiou/aeiou/decwav.exe -v $PWD/patched-dectalk.dll:/var/lib/aeiou/aeiou/dectalk.dll -v $PWD/wineprefix:/wineprefix --name aeiou aeiou:latest
+    docker run --init --rm -it -p 8080:8080 -v $PWD/decwav.exe:/var/lib/aeiou/aeiou/decwav.exe -v $PWD/dectalk/dectalk.dll:/var/lib/aeiou/aeiou/dectalk.dll -v $PWD/dectalk/dtalk_us.dic:/var/lib/aeiou/aeiou/dtalk_us.dic -v $PWD/wineprefix:/wineprefix --name aeiou aeiou:latest
+
+If you patched the `dectalk.dll` from your own installation instead, mount
+`$PWD/patched-dectalk.dll` in place of `$PWD/dectalk/dectalk.dll` and leave out
+the `dtalk_us.dic` mount.
 
 You may also choose to override certain environment variables if desired:
 
@@ -108,12 +127,15 @@ cron script to remove files older than a few days for disk savings).
 ### Troubleshooting
 
   * Error at decwav.cpp:25 after call to TextToSpeechStartup: 4
-    - The most likely cause is that you have not patched dectalk.dll (please
-      check Step 3 again), or you have not bind-mounted your dectalk.dll to the
-      correct location (please check Step 4 again).
+    - The most likely cause is that you are using the dectalk.dll from your own
+      installation and have not patched it (please check Step 3 again), or you
+      have not bind-mounted your dectalk.dll to the correct location (please
+      check Step 4 again).
   * Error at decwav.cpp:25 after call to TextToSpeechStartup: 11
-    - The most likely cause is that your DECtalk installation is incomplete.
-      Try running the DECtalk installer again (see Step 2).
+    - With the dectalk.dll from this repository, check that dtalk_us.dic is
+      mounted next to it (see Step 4).  With your own installation, the most
+      likely cause is that it is incomplete; try running the DECtalk installer
+      again (see Step 2).
   * pid X: timeout waiting for TTS
     - aeiou waits at most 5 seconds for a single text to speech request to be
       rendered.  This error occurs when a single request takes longer than 5
